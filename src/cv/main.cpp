@@ -10,9 +10,9 @@ using namespace std;
 // Image data structures
 Mat img, imgHSV, mask, imgBlur;
 
-// Color threshold values for the tomato
-int hmin = 0, smin = 134, vmin = 76;
-int hmax = 10, smax = 255, vmax = 255;
+// Color threshold values for the ball
+int hmin = 83, smin = 65, vmin = 100;
+int hmax = 108, smax = 255, vmax = 255;
 
 // Number of tomato arc positions saved (how many frames to keep info)
 int N = 5;
@@ -91,18 +91,18 @@ void getLargeContours() {
 
 int main() {
 
-    VideoCapture cap(-1);
+    VideoCapture cap(2);
 
     namedWindow("Trackbars", (640, 200));
     createTrackbar("Arc", "Trackbars", &showArc, 1);
     createTrackbar("Center", "Trackbars", &showCent, 1);
     createTrackbar("Contour", "Trackbars", &showCont, 1);
-    //createTrackbar("Hue Min", "Trackbars", &hmin, 179);
-    //createTrackbar("Hue Max", "Trackbars", &hmax, 179);
-    //createTrackbar("Sat Min", "Trackbars", &smin, 255);
-    //createTrackbar("Sat Max", "Trackbars", &smax, 255);
-    //createTrackbar("Val Min", "Trackbars", &vmin, 255);
-    //createTrackbar("Val Max", "Trackbars", &vmax, 255);
+    createTrackbar("Hue Min", "Trackbars", &hmin, 179);
+    createTrackbar("Hue Max", "Trackbars", &hmax, 179);
+    createTrackbar("Sat Min", "Trackbars", &smin, 255);
+    createTrackbar("Sat Max", "Trackbars", &smax, 255);
+    createTrackbar("Val Min", "Trackbars", &vmin, 255);
+    createTrackbar("Val Max", "Trackbars", &vmax, 255);
 
     while (true) {
         cap.read(img);
