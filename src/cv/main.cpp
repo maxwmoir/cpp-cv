@@ -1,8 +1,9 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include <iostream>
+#include <opencv2/opencv.hpp>
 #include <vector>
+#include "client.h"
 
 using namespace cv;
 using namespace std;
@@ -14,7 +15,7 @@ Mat img, imgHSV, mask, imgBlur;
 int hmin = 83, smin = 65, vmin = 100;
 int hmax = 108, smax = 255, vmax = 255;
 
-// Number of tomato arc positions saved (how many frames to keep info)
+// Number of ball arc positions saved (how many frames to keep info)
 int N = 5;
 int frames = 0;
 vector<pair<float, float>> past(N);
@@ -91,7 +92,7 @@ void getLargeContours() {
 
 int main() {
 
-    VideoCapture cap(2);
+    VideoCapture cap(0);
 
     namedWindow("Trackbars", (640, 200));
     createTrackbar("Arc", "Trackbars", &showArc, 1);
@@ -103,6 +104,15 @@ int main() {
     createTrackbar("Sat Max", "Trackbars", &smax, 255);
     createTrackbar("Val Min", "Trackbars", &vmin, 255);
     createTrackbar("Val Max", "Trackbars", &vmax, 255);
+
+    Client client("127.0.0.1", 9999);
+
+    vector<float> test = {1.0, 2.0, 3.1};
+    for (int i = 0; i < 10; i ++) {
+        client.sendFloatVector(test);
+    }
+
+    return 0;
 
     while (true) {
         cap.read(img);
