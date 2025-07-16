@@ -38,9 +38,16 @@ public:
 
     void sendFloatVector(const vector<float>& vec) {
         size_t dataSize = vec.size() * sizeof(float);
-        sendto(sockfd, vec.data(), dataSize, 0,
-               (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+        ssize_t sent = sendto(sockfd, vec.data(), dataSize, 0,
+                              (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+
+        if (sent < 0) {
+            perror("sendto failed");
+        } else {
+            cout << "[Client] Sent " << sent << " bytes (" << vec.size() << " floats)" << endl;
+        }
     }
+
 
 
     void closeSocket() {

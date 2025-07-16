@@ -9,21 +9,25 @@ class UDPServer:
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.host, self.port))
+
+        self.array = []
+
         print(f"Server listening on {self.host}:{self.port}")
 
     def start(self):
         print("Waiting for messages...")
+        
+        count = 0
         while True:
-            data, addr = self.sock.recvfrom(4096)
+            data, addr = self.sock.recvfrom(4097)
             float_array = np.frombuffer(data, dtype=np.float32)
-            print(f"Received from {addr}: {float_array}")
-            
+            count += 1
+            self.array = float_array
 
     def run_async(self):
         thread = threading.Thread(target=self.start)
-        thread.daemon = True
         thread.start()
 
 if __name__ == "__main__":
     server = UDPServer(port=9999)
-    server.start()
+    server.run_async()

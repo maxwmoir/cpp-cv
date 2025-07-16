@@ -12,7 +12,7 @@ using namespace std;
 Mat img, imgHSV, mask, imgBlur;
 
 // Color threshold values for the ball
-int hmin = 83, smin = 65, vmin = 100;
+int hmin = 83, smin = 70, vmin = 100;
 int hmax = 108, smax = 255, vmax = 255;
 
 // Number of ball arc positions saved (how many frames to keep info)
@@ -26,7 +26,7 @@ int showArc = 0, showCont = 0, showCent = 0;
 vector<pair<float, float>> quad(quad_size);
 
 
-void interpolatePolynomial() {
+void interpolatePolynomial(Client& client) {
 
     float x0 = past[0].first;
     float y0 = past[0].second;
@@ -35,10 +35,13 @@ void interpolatePolynomial() {
     float x2 = past[4].first;
     float y2 = past[4].second;
 
+    vector<float> nodes = {x0, y0, x1, y1, x2, y2 };
+
     if ((!x0 && !y0) || (!x1 && !y1) || (!x2 && !y2)) {
         return;
     }
 
+    client.sendFloatVector(nodes);
 
     // Calculate Lagrange basis functions
     for (int i = 0; i < 650; i++) {
@@ -81,8 +84,6 @@ void getLargeContours() {
             past[frames % N] = make_pair(cx, cy);
             frames++;
 
-            float dy = abs(past[N - 2].second - past[0].second);
-
             if (showCont)
                 drawContours(img, valid, i, Scalar(255, 0, 255), 2);
         }
@@ -92,9 +93,9 @@ void getLargeContours() {
 
 int main() {
 
-    VideoCapture cap(0);
+    VideoCapture cap(2);
 
-    namedWindow("Trackbars", (640, 200));
+    namedWindow("Trackbars", (640, 20));
     createTrackbar("Arc", "Trackbars", &showArc, 1);
     createTrackbar("Center", "Trackbars", &showCent, 1);
     createTrackbar("Contour", "Trackbars", &showCont, 1);
@@ -107,16 +108,10 @@ int main() {
 
     Client client("127.0.0.1", 9999);
 
-    vector<float> test = {1.0, 2.0, 3.1};
-    for (int i = 0; i < 10; i ++) {
-        client.sendFloatVector(test);
-    }
-
-    return 0;
-
     while (true) {
         cap.read(img);
 
+        flip(img, img, 1);
         cvtColor(img, imgHSV, COLOR_BGR2HSV);
 
         Scalar lower(hmin, smin, vmin);
@@ -143,8 +138,7 @@ int main() {
             }
         }
 
-        interpolatePolynomial();
-
+        interpolatePolynomial(client);
 
         imshow("img", img);
 
