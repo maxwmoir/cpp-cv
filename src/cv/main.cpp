@@ -8,25 +8,7 @@
 using namespace cv;
 using namespace std;
 
-// Image data structures
-Mat img, imgHSV, mask, imgBlur;
-
-// Color threshold values for the ball
-int hmin = 83, smin = 70, vmin = 100;
-int hmax = 108, smax = 255, vmax = 255;
-
-// Number of ball arc positions saved (how many frames to keep info)
-int N = 5;
-int frames = 0;
-vector<pair<float, float>> past(N);
-
-// Number of nodes in grid for quadratic interpolent
-int quad_size = 1000;
-int showArc = 0, showCont = 0, showCent = 0;
-vector<pair<float, float>> quad(quad_size);
-
-
-void interpolatePolynomial(Client& client) {
+void interpolatePolynomial(Client& client, vector<pair<float, float>>& past, int showCont, vector<pair<float, float>>& quad, int quad_size) {
 
     float x0 = past[0].first;
     float y0 = past[0].second;
@@ -58,7 +40,7 @@ void interpolatePolynomial(Client& client) {
 
 }
 
-void getLargeContours() {
+void getLargeContours(vector<pair<float, float>>& past, Mat& mask, Mat& img, int frames, int N, int showCont) {
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
 
@@ -93,6 +75,23 @@ void getLargeContours() {
 
 int main() {
 
+    // Image data structures
+    Mat img, imgHSV, mask, imgBlur;
+
+    // Color threshold values for the ball
+    int hmin = 83, smin = 70, vmin = 100;
+    int hmax = 108, smax = 255, vmax = 255;
+
+    // Number of ball arc positions saved (how many frames to keep info)
+    int N = 5;
+    int frames = 0;
+    vector<pair<float, float>> past(N);
+
+    // Number of nodes in grid for quadratic interpolent
+    int quad_size = 1000;
+    int showArc = 0, showCont = 0, showCent = 0;
+    vector<pair<float, float>> quad(quad_size);
+
     VideoCapture cap(2);
 
     namedWindow("Trackbars", (640, 20));
@@ -120,8 +119,7 @@ int main() {
         inRange(imgHSV, lower, upper, mask);
         GaussianBlur(mask, imgBlur, Size(3, 3), 3, 0);
 
-        getLargeContours();
-
+        getLargeContours(past, mask, img, frames, N, showCont);
 
         if (showCent) {
             for (auto p : past) {
@@ -138,7 +136,7 @@ int main() {
             }
         }
 
-        interpolatePolynomial(client);
+        interpolatePolynomial(client, past, showCont, quad, quad_size);
 
         imshow("img", img);
 

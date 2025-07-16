@@ -1,32 +1,40 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
-from server import UDPServer
+"""
+Ball trajectory tracker
+- graph.py
+
+Created: 
+- 10/07/25
+
+Author: 
+- Max Moir
+"""
+
+# Package Imports
 from sympy import *
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+# Local imports
+from server import UDPServer
+
+# Initialise symbols
+x = symbols('x')
 
 # Create figure 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-server = UDPServer(port=9999)
-server.run_async()
-# Initialize line data
-line, = ax.plot([], [], lw=2, color='blue')
-line1, = ax.plot([], [], lw=2, color='red')
-
-line.set_label('Ball trajectory')
-line1.set_label('Trajectory derivative')
-
-# Axis limits
+# Format graph 
+ax.set_title('Ball trajectory')
 ax.set_xlim(0, 600)
 ax.set_ylim(0, 600)
-
-ax.set_title('Ball trajectory')
 ax.set_xlabel('x (pixels)')
 ax.set_ylabel('y (pixels)')
 
-x = symbols('x')
+line, = ax.plot([], [], lw=2, color='blue')
+line1, = ax.plot([], [], lw=2, color='red')
+line.set_label('Ball trajectory')
+line1.set_label('Trajectory derivative')
 
 # Update function
 def update(frame):
@@ -36,16 +44,15 @@ def update(frame):
         L0 = ((x - server.array[2]) * (x - server.array[4])) / ((server.array[0] - server.array[2]) * (server.array[0] - server.array[4]))
         L1 = ((x - server.array[0]) * (x - server.array[4])) / ((server.array[2] - server.array[0]) * (server.array[2] - server.array[4]))
         L2 = ((x - server.array[0]) * (x - server.array[2])) / ((server.array[4] - server.array[0]) * (server.array[4] - server.array[2]))
-        eqn= server.array[1] * L0 + server.array[3] * L1 + server.array[5] * L2
+
+        eqn = server.array[1] * L0 + server.array[3] * L1 + server.array[5] * L2
         deqn = diff(eqn, x)
-        print(eqn)
-        print()
+
         for i in range(601):
             x_data.append(i)
             y_data.append(-1 * eqn.subs(x, i) + 600)
             dy_data.append(deqn.subs(x, i))
 
-    # Limit to last 100 points for a rolling window
     max_points = 600
     x_data[:] = x_data[-max_points:]
     y_data[:] = y_data[-max_points:]
@@ -56,7 +63,13 @@ def update(frame):
     line1.set_data(x_data, dy_data)
     return line,
 
-# Animate
-ani = FuncAnimation(fig, update, interval=20)
 
-plt.show()
+if __name__ == "__main__":
+
+    # Create and start server
+    server = UDPServer(port=9999)
+    server.run_async()
+
+    # Draw graph with update function
+    ani = FuncAnimation(fig, update, interval=20)
+    plt.show()

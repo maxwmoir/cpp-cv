@@ -1,4 +1,15 @@
-# udp_server.py
+"""
+UDP server class
+- server.py
+
+Created: 
+- 10/07/25
+
+Author: 
+- Max Moir
+"""
+
+# Package imports
 import socket
 import threading
 import numpy as np
@@ -9,14 +20,9 @@ class UDPServer:
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.host, self.port))
-
         self.array = []
 
-        print(f"Server listening on {self.host}:{self.port}")
-
     def start(self):
-        print("Waiting for messages...")
-        
         count = 0
         while True:
             data, addr = self.sock.recvfrom(4097)
