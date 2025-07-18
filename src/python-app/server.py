@@ -14,26 +14,32 @@ import socket
 import threading
 import numpy as np
 
-class UDPServer:
-    def __init__(self, host='0.0.0.0', port=9999):
+# Program Constants
+
+DEFAULT_HOST = '0.0.0.0'
+DEFAULT_PORT = 9999
+
+class Server:
+    def __init__(self, host = DEFAULT_HOST, port = DEFAULT_PORT):
         self.host = host
         self.port = port
+        self.last_packet = []
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.host, self.port))
-        self.array = []
 
     def start(self):
-        count = 0
+        print("Starting")
         while True:
             data, addr = self.sock.recvfrom(4097)
             float_array = np.frombuffer(data, dtype=np.float32)
-            count += 1
-            self.array = float_array
+            self.last_packet = float_array
+            
+
 
     def run_async(self):
         thread = threading.Thread(target=self.start)
         thread.start()
 
 if __name__ == "__main__":
-    server = UDPServer(port=9999)
+    server = Server(port=9999)
     server.run_async()

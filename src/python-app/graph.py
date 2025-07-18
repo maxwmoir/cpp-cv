@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # Local imports
-from server import UDPServer
+from server import Server
 
 # Initialise symbols
 x = symbols('x')
@@ -40,12 +40,14 @@ line1.set_label('Trajectory derivative')
 def update(frame):
     x_data, y_data, dy_data = [], [], []
 
-    if len(server.array) > 0:
-        L0 = ((x - server.array[2]) * (x - server.array[4])) / ((server.array[0] - server.array[2]) * (server.array[0] - server.array[4]))
-        L1 = ((x - server.array[0]) * (x - server.array[4])) / ((server.array[2] - server.array[0]) * (server.array[2] - server.array[4]))
-        L2 = ((x - server.array[0]) * (x - server.array[2])) / ((server.array[4] - server.array[0]) * (server.array[4] - server.array[2]))
+    points = server.last_packet
 
-        eqn = server.array[1] * L0 + server.array[3] * L1 + server.array[5] * L2
+    if len(points) > 0:
+        L0 = ((x - points[2]) * (x - points[4])) / ((points[0] - points[2]) * (points[0] - points[4]))
+        L1 = ((x - points[0]) * (x - points[4])) / ((points[2] - points[0]) * (points[2] - points[4]))
+        L2 = ((x - points[0]) * (x - points[2])) / ((points[4] - points[0]) * (points[4] - points[2]))
+
+        eqn = points[1] * L0 + points[3] * L1 + points[5] * L2
         deqn = diff(eqn, x)
 
         for i in range(601):
@@ -67,7 +69,7 @@ def update(frame):
 if __name__ == "__main__":
 
     # Create and start server
-    server = UDPServer(port=9999)
+    server = Server(port=9999)
     server.run_async()
 
     # Draw graph with update function
