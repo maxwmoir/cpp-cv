@@ -35,7 +35,8 @@ class Server:
         self.port = port
         self.last_packet = []
         self.sock = None 
-        self.sock.bind((self.host, self.port))
+
+        self.bind_socket()
 
     def bind_socket(self):
         """
@@ -68,7 +69,7 @@ class Server:
             data, addr = self.sock.recvfrom(4097)
             float_array = np.frombuffer(data, dtype=np.float32)
             self.last_packet = float_array
-            
+             
 
 
     def run_async(self):

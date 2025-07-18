@@ -96,18 +96,15 @@ int main() {
      */
 
     // Image data structures
+    VideoCapture cap(0);
     Mat img, imgHSV, mask, imgBlur;
-
-
 
     // Number of ball arc positions saved (how many frames to keep info)
     vector<pair<float, float>> past(NODES);
     vector<pair<float, float>> recent_centers;
 
     // Number of nodes in grid for quadratic interpolent
-    bool show_contours = true, show_centers = true;
-
-    VideoCapture cap(CAMERA);
+    bool show_contours = true, show_center = true;
 
     // namedWindow("Trackbars", (640, 20));
     // createTrackbar("Center", "Trackbars", &showCent, 1);
@@ -159,12 +156,11 @@ int main() {
             client.sendFloatVector(packet_data);
         }
 
-        if (show_centers) {
-            for (auto p : past) {
-                if (p.first != 0 || p.second != 0) {
-                    circle(img, Point(p.first, p.second), 3, Scalar(0, 225, 0), 3);
+        if (show_center && recent_centers.size()) {
+            pair<float, float> p = recent_centers[0];
+            if (p.first != 0 || p.second != 0) {
+                circle(img, Point(p.first, p.second), 3, Scalar(0, 225, 0), 3);
 
-                }
             }
         }
 

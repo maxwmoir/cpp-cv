@@ -42,14 +42,14 @@ def validate_packet(packet):
     """
     Validate incoming packet data
     """
-    if (len(packet) != 3):
+    if (len(packet) != 6):
         return False
     
     for value in packet:
         if value > 600 or value < 0:
             return False
     
-    return true
+    return True
 
 def update(frame):
     """
@@ -58,6 +58,9 @@ def update(frame):
     Args:
         frame (int): Given by the library
     """
+
+    x_data, y_data, dy_data = [0 * GRAPH_WIDTH], [], []
+
     points = server.last_packet
 
     # Interpolate a quadratic for the points using a Lagrangian basis
@@ -88,5 +91,5 @@ if __name__ == "__main__":
     server.run_async()
 
     # Draw graph with update function
-    ani = FuncAnimation(fig, update, interval = 20)
+    ani = FuncAnimation(fig, update, interval = 1)
     plt.show()
