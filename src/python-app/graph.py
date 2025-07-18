@@ -13,21 +13,23 @@ Author:
 from sympy import *
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-
-# Local imports
 from server import Server
+
+# Constants
+GRAPH_WIDTH = 600
+GRAPH_HEIGHT = 600
+SOCK_PORT = 9999
 
 # Initialise symbols
 x = symbols('x')
 
 # Create figure 
 fig = plt.figure()
-ax = fig.add_subplot(111)
+ax = fig.add_subplot()
 
-# Format graph 
 ax.set_title('Ball trajectory')
-ax.set_xlim(0, 600)
-ax.set_ylim(0, 600)
+ax.set_xlim(0, GRAPH_WIDTH)
+ax.set_ylim(0, GRAPH_HEIGHT)
 ax.set_xlabel('x (pixels)')
 ax.set_ylabel('y (pixels)')
 
@@ -36,29 +38,42 @@ line1, = ax.plot([], [], lw=2, color='red')
 line.set_label('Ball trajectory')
 line1.set_label('Trajectory derivative')
 
-# Update function
-def update(frame):
-    x_data, y_data, dy_data = [], [], []
+def validate_packet(packet):
+    """
+    Validate incoming packet data
+    """
+    if (len(packet) != 3):
+        return False
+    
+    for value in packet:
+        if value > 600 or value < 0:
+            return False
+    
+    return true
 
+def update(frame):
+    """
+    Function used to update the graph
+
+    Args:
+        frame (int): Given by the library
+    """
     points = server.last_packet
 
-    if len(points) > 0:
+    # Interpolate a quadratic for the points using a Lagrangian basis
+    if validate_packet(points):
         L0 = ((x - points[2]) * (x - points[4])) / ((points[0] - points[2]) * (points[0] - points[4]))
         L1 = ((x - points[0]) * (x - points[4])) / ((points[2] - points[0]) * (points[2] - points[4]))
         L2 = ((x - points[0]) * (x - points[2])) / ((points[4] - points[0]) * (points[4] - points[2]))
 
+        # Function and function derivative equations
         eqn = points[1] * L0 + points[3] * L1 + points[5] * L2
         deqn = diff(eqn, x)
-
-        for i in range(601):
-            x_data.append(i)
-            y_data.append(-1 * eqn.subs(x, i) + 600)
-            dy_data.append(deqn.subs(x, i))
-
-    max_points = 600
-    x_data[:] = x_data[-max_points:]
-    y_data[:] = y_data[-max_points:]
-    dy_data[:] = dy_data[-max_points:]
+        
+        # Populate data vectors
+        x_data  = [i for i in range(GRAPH_WIDTH + 1)]
+        y_data  = [-1 * eqn.subs(x, i) + GRAPH_HEIGHT for i in range(GRAPH_WIDTH + 1)]
+        dy_data = [deqn.subs(x, i) for i in range(GRAPH_WIDTH + 1)]
 
     # Update line plot
     line.set_data(x_data, y_data)
@@ -69,9 +84,9 @@ def update(frame):
 if __name__ == "__main__":
 
     # Create and start server
-    server = Server(port=9999)
+    server = Server(port = SOCK_PORT)
     server.run_async()
 
     # Draw graph with update function
-    ani = FuncAnimation(fig, update, interval=20)
+    ani = FuncAnimation(fig, update, interval = 20)
     plt.show()
