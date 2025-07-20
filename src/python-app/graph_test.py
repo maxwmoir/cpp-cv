@@ -1,7 +1,16 @@
+"""
+Packet verification function tests
+- graph_test.py
+
+Created: 
+- 18/07/25
+
+Author: 
+- Max Moir
+"""
 import sys
 import pytest
 import numpy as np
-
 
 from graph import validate_packet
 
