@@ -67,7 +67,6 @@ class Client {
             }
         }
 
-
         void closeSocket() {
             /**
              * Closes the client's socket

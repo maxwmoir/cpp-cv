@@ -12,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include "client.h"
+#include "utils.h"
 
 using namespace cv;
 using namespace std;
@@ -73,21 +74,6 @@ vector<pair<float, float>> findLargeContours(Mat& mask, Mat& img, bool show_cont
     return centers;
 }
 
-bool validPoints(vector<float> points) {
-    /**
-     * Determines whether a point arc is valid (concave), used to filter arcs that are not thrown.
-     */
-
-    if (points.size() != 6) {
-        return 0;
-    }
-
-    // Find y-coordinate the along line between first and last points at mid-point x value.
-    float mid = (points[5] - points[1]) / (points[4] - points[0]) * (points[2] - points[0]) + points[1];
-
-    // If the mid point is smaller than the found value the quadratic is concave and valid
-    return points[3] >= mid;
-}
 
 
 int main() {
@@ -152,9 +138,10 @@ int main() {
             past[4].second,
         };
 
-        if (validPoints(packet_data)) {
+        if (checkConcavity(packet_data)) {
             client.sendFloatVector(packet_data);
         }
+
 
         if (show_center && recent_centers.size()) {
             pair<float, float> p = recent_centers[0];
