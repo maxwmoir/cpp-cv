@@ -12,17 +12,27 @@
 
 // Demonstrate some basic assertions.
 TEST(ConcavityTest, BasicAssertions) {
-    vector<float> points = {0.0, 0.0, 1.0, 1.0, 0.0, 2.0};
+
+    vector<float> points = {0.0, 0.0, 1.0, 10.0, 2.0, 2.0};
 
     EXPECT_EQ(checkConcavity(points), true);
 
-    points = {0.0, 0.5, 1.0};
+    points = {0.0, 0.0, 0.5, 0.5, 1.0, 1.0};
 
-    // EXPECT_EQ(checkConcavity(points), true);
+    bool first = checkConcavity(points);
 
-    points = {0.0, 0.499, 1.0};
+    EXPECT_EQ(checkConcavity(points), true);
 
-    // EXPECT_EQ(checkConcavity(points), false);
+    points = {0.0, 0.0, 0.5, 0.4999, 1.0, 1.0};
 
+    EXPECT_EQ(checkConcavity(points), false);
+
+}
+
+TEST(MovementTest, BasicAssertions) {
+
+    vector<float> points = {0.0, 0.0, 1.0, 10.0, 2.0, 2.0};
+
+    EXPECT_EQ(checkMovement(points), true);
 
 }
