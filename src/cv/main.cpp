@@ -21,17 +21,18 @@ using namespace std;
 const int CONTOUR_SIZE = 1000;
 const float CONTOUR_PRECISION = 0.001;
 
-// Target colour thresholds
-const int HUE_MIN = 83,  SAT_MIN = 70 , VAL_MIN = 100;
-const int HUE_MAX = 108, SAT_MAX = 255, VAL_MAX = 255;
-
 const int NODES = 5;
 const int CAMERA = 2;
 
 const string HOST = "127.0.0.1";
 const int PORT = 9999;
 
-vector<pair<float, float>> findLargeContours(Mat& mask, Mat& img, bool show_contours) {
+// Target colour thresholds
+const int HUE_MIN = 83,  SAT_MIN = 70 , VAL_MIN = 100;
+const int HUE_MAX = 108, SAT_MAX = 255, VAL_MAX = 255;
+
+
+vector<pair<float, float>> findLargeContours(Mat& mask, Mat& img) {
     /**
      * Takes input mask and finds all the contours of large enough size to be the target.
      *
@@ -65,16 +66,12 @@ vector<pair<float, float>> findLargeContours(Mat& mask, Mat& img, bool show_cont
             centers.push_back(make_pair(cx, cy));
 
             // Draw contours to output image
-            if (show_contours) {
-                drawContours(img, valid, i, Scalar(255, 0, 255), 2);
-            }
+            drawContours(img, valid, i, Scalar(255, 0, 255), 2);
         }
     }
 
     return centers;
 }
-
-
 
 int main() {
     /**
@@ -82,29 +79,15 @@ int main() {
      */
 
     // Image data structures
-    VideoCapture cap(2);
+    VideoCapture cap(CAMERA);
     Mat img, imgHSV, mask, imgBlur;
 
     // Number of ball arc positions saved (how many frames to keep info)
     vector<pair<float, float>> past(NODES);
     vector<pair<float, float>> recent_centers;
 
-    // Number of nodes in grid for quadratic interpolent
-    bool show_contours = true, show_center = true;
-
-    // namedWindow("Trackbars", (640, 20));
-    // createTrackbar("Center", "Trackbars", &showCent, 1);
-    // createTrackbar("Contour", "Trackbars", &showCont, 1);
-    // createTrackbar("Hue Min", "Trackbars", &hmin, 179);
-    // createTrackbar("Hue Max", "Trackbars", &hmax, 179);
-    // createTrackbar("Sat Min", "Trackbars", &smin, 255);
-    // createTrackbar("Sat Max", "Trackbars", &smax, 255);
-    // createTrackbar("Val Min", "Trackbars", &vmin, 255);
-    // createTrackbar("Val Max", "Trackbars", &vmax, 255);
-
     Client client(HOST, PORT);
 
-    int frame = 0;
     while (true) {
 
         // Read image from camera, flip it, blur it and find large contours that fit colour requirements
@@ -120,7 +103,7 @@ int main() {
         GaussianBlur(mask, imgBlur, Size(3, 3), 3, 0);
 
         // Find centers of valid contours
-        recent_centers = findLargeContours(mask, img, show_contours);
+        recent_centers = findLargeContours(mask, img);
 
         // Overwrite past vector cyclicly with new center information
         if (recent_centers.size()) {
@@ -144,14 +127,7 @@ int main() {
             client.sendFloatVector(packet_data);
         }
 
-        circle(img, Point( past[0].first, past[0].second), 3, Scalar(0, 225, 0), 3);
-        circle(img, Point( past[1].first, past[1].second), 3, Scalar(0, 225, 0), 3);
-        circle(img, Point( past[2].first, past[2].second), 3, Scalar(0, 225, 0), 3);
-        circle(img, Point( past[3].first, past[3].second), 3, Scalar(0, 225, 0), 3);
-        circle(img, Point( past[4].first, past[4].second), 3, Scalar(0, 225, 0), 3);
-
-
-        if (show_center && recent_centers.size()) {
+        if (recent_centers.size()) {
             pair<float, float> p = recent_centers[0];
             if (p.first != 0 || p.second != 0) {
                 circle(img, Point(p.first, p.second), 3, Scalar(0, 225, 0), 3);
