@@ -82,7 +82,7 @@ int main() {
      */
 
     // Image data structures
-    VideoCapture cap(0);
+    VideoCapture cap(2);
     Mat img, imgHSV, mask, imgBlur;
 
     // Number of ball arc positions saved (how many frames to keep info)
@@ -124,8 +124,10 @@ int main() {
 
         // Overwrite past vector cyclicly with new center information
         if (recent_centers.size()) {
-            past[frame % NODES] = recent_centers[0];
-            frame ++;
+            for (int i = 1; i < past.size(); i ++) {
+                past[past.size() - i] = past[past.size() - i - 1];
+            }
+            past[0] = recent_centers[0];
         }
 
         // Create and send packet to server with spaced points
@@ -138,9 +140,15 @@ int main() {
             past[4].second,
         };
 
-        if (checkConcavity(packet_data)) {
+        if (!checkConcavity(packet_data) && checkMovement(packet_data)) {
             client.sendFloatVector(packet_data);
         }
+
+        circle(img, Point( past[0].first, past[0].second), 3, Scalar(0, 225, 0), 3);
+        circle(img, Point( past[1].first, past[1].second), 3, Scalar(0, 225, 0), 3);
+        circle(img, Point( past[2].first, past[2].second), 3, Scalar(0, 225, 0), 3);
+        circle(img, Point( past[3].first, past[3].second), 3, Scalar(0, 225, 0), 3);
+        circle(img, Point( past[4].first, past[4].second), 3, Scalar(0, 225, 0), 3);
 
 
         if (show_center && recent_centers.size()) {

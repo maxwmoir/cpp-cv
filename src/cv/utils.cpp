@@ -8,6 +8,8 @@
 
 #include <vector>
 #include "utils.h"
+#include <cmath>
+#include <iostream>
 
 using namespace std;
 
@@ -38,5 +40,6 @@ bool checkMovement(vector<float> points) {
         return 0;
     }
 
-    return true;
+    float ydist = abs(points[5] - points[1]) * abs(points[5] - points[1]);
+    return ydist > 2000;
 }
