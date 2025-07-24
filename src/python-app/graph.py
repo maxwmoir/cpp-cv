@@ -65,17 +65,32 @@ def validate_packet(packet):
     return True
 
 def interpolate_polynomial(x_val, points):
+    """
+    Interpolates a polynomial from three points and returns what the output should be with input x_val.
+    
+    Args:
+        x_val    (float): Input to interpolation function
+        points ([float]): Three points to interpolate polynomial 
+    """
     L0 = ((x_val - points[2]) * (x_val - points[4])) / ((points[0] - points[2]) * (points[0] - points[4]))
     L1 = ((x_val - points[0]) * (x_val - points[4])) / ((points[2] - points[0]) * (points[2] - points[4]))
     L2 = ((x_val - points[0]) * (x_val - points[2])) / ((points[4] - points[0]) * (points[4] - points[2]))
 
     return points[1] * L0 + points[3] * L1 + points[5] * L2
 
+def polynomial_slope(x_val, points):
+    """
+    Gives derivative of interpolated polynomial at a specific x value
+    
+    Args:
+        x_val    (float): Input to interpolation derivative 
+        points ([float]): Three points to interpolate polynomial 
+    """
+    L0 = points[1] * (2 * x_val - points[4] - points[2]) / ((points[0] - points[2]) * (points[0] - points[4]))
+    L1 = points[3] * (2 * x_val - points[4] - points[0]) / ((points[2] - points[0]) * (points[2] - points[4]))
+    L2 = points[5] * (2 * x_val - points[2] - points[0]) / ((points[4] - points[0]) * (points[4] - points[2]))
+    return L0 + L1 + L2
 
-def derivative_calc(x, a, b, c, d):
-    num = d * (2 * x - b - a) 
-    denom = (c - a) * (c - b)
-    return num / denom
 
 def update(frame):
     """
@@ -84,35 +99,30 @@ def update(frame):
     Args:
         frame (int): Given by the library
     """
-
     x_data = [0] * GRAPH_WIDTH
     y_data = [0] * GRAPH_WIDTH
     dy_data = [0] * GRAPH_WIDTH
 
     points = server.last_packet
 
-    point = point_slider.val 
+    derivative_x = point_slider.val 
 
     # Interpolate a quadratic for the points using a Lagrangian basis
     if validate_packet(points):
 
-        ay = interpolate_polynomial(point, points) 
+        derivative_y = interpolate_polynomial(derivative_x, points) 
+        derivative_slope = polynomial_slope(derivative_x, points) 
 
         for c in range(600):
-            x_data[c] = c
-            
-            L3 = derivative_calc(point, points[2], points[4], points[0], points[1])
-            L4 = derivative_calc(point, points[0], points[4], points[2], points[3])
-            L5 = derivative_calc(point, points[0], points[2], points[4], points[5])
-
-            # Function and function derivative equations
             y = interpolate_polynomial(c, points)
-            dy = L3 + L4 + L5 
 
             # Populate data vectors
+            x_data[c] = c
             y_data[c] = -1 * y + GRAPH_HEIGHT
-            dist =  (GRAPH_HEIGHT - ay) + dy * point
-            dy_data[c] = -dy * c + dist
+
+            # Graph the derivative in the correct location
+            y_intercept = GRAPH_HEIGHT - derivative_y + derivative_slope * derivative_x
+            dy_data[c] = -derivative_slope * c + y_intercept
 
     # Update line plot
     line.set_data(x_data, y_data)
