@@ -127,13 +127,14 @@ int main() {
 
         vector<float> blank = {0, 0, 0, 0, 0, 0, 0, 0};
 
+        // If no movement detected send a blank packet, otherwise send trajectory points
         if (!checkMovement(packet_data, MOVEMENT_THRESHOLD)) {
             client.sendFloatVector(blank);
         } else if (!checkConcavity(packet_data)) {
             client.sendFloatVector(packet_data);
         }
 
-
+        // Draw target center
         if (recent_centers.size()) {
             pair<float, float> p = recent_centers[0];
             if (p.first != 0 || p.second != 0) {
