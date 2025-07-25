@@ -112,7 +112,7 @@ def update(frame):
         tangent_slope = polynomial_slope(tangent_x, points) 
 
         # Update legend
-        line1.set_label(f'Trajectory tangent ({-tangent_slope:.2f})')
+        line1.set_label(f'Tangent gradient ({-tangent_slope:.2f})')
         ax.legend(loc='upper right')
 
         # Populate data vectors
