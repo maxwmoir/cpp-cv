@@ -40,6 +40,6 @@ TEST(MovementTest, BasicAssertions) {
 
     vector<float> points = {0.0, 0.0, 1.0, 10.0, 2.0, 2.0};
 
-    EXPECT_EQ(checkMovement(points), true);
+    EXPECT_EQ(checkMovement(points, 2), true);
 
 }

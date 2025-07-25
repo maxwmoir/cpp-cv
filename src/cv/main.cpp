@@ -26,10 +26,12 @@ const int CAMERA = 0;
 
 const string HOST = "127.0.0.1";
 const int PORT = 9999;
+const float MOVEMENT_THRESHOLD = 2500;
 
 // Target colour thresholds
 const int HUE_MIN = 83,  SAT_MIN = 70 , VAL_MIN = 100;
 const int HUE_MAX = 108, SAT_MAX = 255, VAL_MAX = 255;
+
 
 
 vector<pair<float, float>> findLargeContours(Mat& mask, Mat& img) {
@@ -123,9 +125,14 @@ int main() {
             past[4].second,
         };
 
-        if (!checkConcavity(packet_data) && checkMovement(packet_data)) {
+        vector<float> blank = {0, 0, 0, 0, 0, 0, 0, 0};
+
+        if (!checkMovement(packet_data, MOVEMENT_THRESHOLD)) {
+            client.sendFloatVector(blank);
+        } else if (!checkConcavity(packet_data)) {
             client.sendFloatVector(packet_data);
         }
+
 
         if (recent_centers.size()) {
             pair<float, float> p = recent_centers[0];

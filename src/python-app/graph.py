@@ -36,10 +36,11 @@ line1, = ax.plot([], [], lw=2, color='red')
 line.set_label('Target trajectory')
 ax.legend(loc='upper right')
 
+# Initialise slider
 slider_ax = plt.axes([0.2, 0.1, 0.6, 0.03], facecolor='lightgoldenrodyellow')
 point_slider = Slider(
     ax=slider_ax,
-    label='Point (x)',
+    label='Tangent (x)',
     valmin=0,
     valmax=GRAPH_WIDTH - 1,
     valinit=300,
@@ -94,36 +95,39 @@ def update(frame):
     Args:
         frame (int): Given by the library
     """
+    # x, y, and tangent data vectors
     x_data = [0] * GRAPH_WIDTH
     y_data = [0] * GRAPH_WIDTH
-    dy_data = [0] * GRAPH_WIDTH
+    t_data = [0] * GRAPH_WIDTH
 
     points = server.last_packet
 
-    derivative_x = point_slider.val 
+    tangent_x = point_slider.val 
 
     # Interpolate a quadratic for the points using a Lagrangian basis
     if validate_packet(points):
+        
+        # Find tangent slope and location
+        tangent_y = interpolate_polynomial(tangent_x, points) 
+        tangent_slope = polynomial_slope(tangent_x, points) 
 
-        derivative_y = interpolate_polynomial(derivative_x, points) 
-        derivative_slope = polynomial_slope(derivative_x, points) 
-
-        line1.set_label(f'Trajectory derivative ({-derivative_slope:.2f})')
+        # Update legend
+        line1.set_label(f'Trajectory tangent ({-tangent_slope:.2f})')
         ax.legend(loc='upper right')
+
+        # Populate data vectors
         for c in range(600):
             y = interpolate_polynomial(c, points)
 
-            # Populate data vectors
             x_data[c] = c
             y_data[c] = -1 * y + GRAPH_HEIGHT
 
-            # Graph the derivative in the correct location
-            y_intercept = GRAPH_HEIGHT - derivative_y + derivative_slope * derivative_x
-            dy_data[c] = -derivative_slope * c + y_intercept
+            y_intercept = GRAPH_HEIGHT - tangent_y + tangent_slope * tangent_x
+            t_data[c] = -tangent_slope * c + y_intercept
 
     # Update line plot
     line.set_data(x_data, y_data)
-    line1.set_data(x_data,dy_data)
+    line1.set_data(x_data,t_data)
     return line,
 
 

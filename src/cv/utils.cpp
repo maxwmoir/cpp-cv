@@ -13,7 +13,6 @@
 using namespace std;
 
 int POINT_SIZE = 6;
-float MOVEMENT_THRESHOLD = 2000;
 
 bool checkConcavity(vector<float> points) {
     /**
@@ -33,7 +32,7 @@ bool checkConcavity(vector<float> points) {
 
 }
 
-bool checkMovement(vector<float> points) {
+bool checkMovement(vector<float> points, float threshold) {
     /**
      * Determines whether the target is moving quickly enough in the y dimension to be in flight.
      */
@@ -43,5 +42,5 @@ bool checkMovement(vector<float> points) {
     }
 
     float ydist = abs(points[5] - points[1]) * abs(points[5] - points[1]);
-    return ydist > MOVEMENT_THRESHOLD;
+    return ydist > threshold;
 }
