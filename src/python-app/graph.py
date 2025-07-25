@@ -10,7 +10,6 @@ Author:
 """
 
 # Package Imports
-from sympy import *
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from server import Server
@@ -21,15 +20,12 @@ GRAPH_WIDTH = 600
 GRAPH_HEIGHT = 600
 SOCK_PORT = 9999
 
-# Initialise symbols
-x = symbols('x')
-
 # Create figure 
 fig = plt.figure()
 ax = fig.add_subplot()
 plt.subplots_adjust(bottom=0.25)
 
-ax.set_title('Target trajectory tracker')
+ax.set_title('Flight path tracker')
 ax.set_xlim(0, GRAPH_WIDTH)
 ax.set_ylim(0, GRAPH_HEIGHT)
 ax.set_xlabel('x (pixels)')
@@ -37,8 +33,7 @@ ax.set_ylabel('y (pixels)')
 
 line, = ax.plot([], [], lw=2, color='blue')
 line1, = ax.plot([], [], lw=2, color='red')
-line.set_label('Ball trajectory')
-line1.set_label('Trajectory derivative')
+line.set_label('Target trajectory')
 ax.legend(loc='upper right')
 
 slider_ax = plt.axes([0.2, 0.1, 0.6, 0.03], facecolor='lightgoldenrodyellow')
@@ -113,6 +108,8 @@ def update(frame):
         derivative_y = interpolate_polynomial(derivative_x, points) 
         derivative_slope = polynomial_slope(derivative_x, points) 
 
+        line1.set_label(f'Trajectory derivative ({-derivative_slope:.2f})')
+        ax.legend(loc='upper right')
         for c in range(600):
             y = interpolate_polynomial(c, points)
 

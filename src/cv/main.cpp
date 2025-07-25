@@ -22,7 +22,7 @@ const int CONTOUR_SIZE = 1000;
 const float CONTOUR_PRECISION = 0.001;
 
 const int NODES = 5;
-const int CAMERA = 2;
+const int CAMERA = 0;
 
 const string HOST = "127.0.0.1";
 const int PORT = 9999;
