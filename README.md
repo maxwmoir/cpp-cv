@@ -7,5 +7,6 @@ It uses C++ and OpenCV for image processing, then sends data over a UDP websocke
 
 
 ## Demo
-Coming soon ...
+
+https://github.com/user-attachments/assets/24a0908e-b284-42f1-8f2c-da9eaa2ecde8
 
